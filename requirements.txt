@@ -1,0 +1,8 @@
+django
+djangorestframework
+numpy
+pandas
+requests
+datasketch
+nltk
+py_cdrive_api
