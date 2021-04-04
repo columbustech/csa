@@ -91,45 +91,80 @@ class Home extends React.Component {
           <table className="mx-auto">
             <tr>
               <td>
-                <input type="text" className="cdrive-path-input my-3 px-3 no-right-border" placeholder="Input folder" 
+                <div className="cdapp-label mt-3">
+                  Input folder:
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <input type="text" className="cdrive-path-input px-3 no-right-border"
                   value={this.state.inputPath} onChange={e => this.setState({inputPath: e.target.value})} />
-                <button className="browse-button my-3" onClick={() => this.setState({inputPathSelector: true})}>
+                <button className="browse-button" onClick={() => this.setState({inputPathSelector: true})}>
                   {"Browse"}
                 </button>
               </td>
             </tr>
             <tr>
               <td>
-                <input type="text" className="cdrive-path-input my-3 px-3 no-right-border" placeholder="Output file" 
+                <div className="cdapp-label mt-3">
+                  Output file:
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <input type="text" className="cdrive-path-input px-3 no-right-border" 
                   value={this.state.outputPath} onChange={e => this.setState({outputPath: e.target.value})} />
-                <button className="browse-button my-3" onClick={() => this.setState({outputPathSelector: true})}>
+                <button className="browse-button" onClick={() => this.setState({outputPathSelector: true})}>
                   {"Browse"}
                 </button>
               </td>
             </tr>
             <tr>
               <td>
-                <input type="text" className="cdrive-path-input my-3 px-3" placeholder="Split container URL" 
+                <div className="cdapp-label mt-3">
+                  {"Split container's URL:"}
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <input type="text" className="cdrive-path-input px-3"
                   value={this.state.splitContainer} onChange={e => this.setState({splitContainer: e.target.value})} />
               </td>
             </tr>
             <tr>
               <td>
-                <input type="text" className="cdrive-path-input my-3 px-3" placeholder="Apply container URL" 
+                <div className="cdapp-label mt-3">
+                  {"Apply container's URL:"}
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <input type="text" className="cdrive-path-input px-3"
                   value={this.state.applyContainer} onChange={e => this.setState({applyContainer: e.target.value})} />
               </td>
             </tr>
             <tr>
               <td>
-                <input type="text" className="cdrive-path-input my-3 px-3" placeholder="Apply container copies" 
+                <div className="cdapp-label mt-3">
+                  {"Number of copies of apply container:"}
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <input type="text" className="cdrive-path-input px-3"
                   value={this.state.copies} onChange={e => this.setState({copies: e.target.value})} />
               </td>
             </tr>
             <tr>
               <td>
                 <div className="w-100 my-4 text-center">
-                  <button className="btn btn-primary btn-lg" style={{width: 200}} onClick={this.executeJob}>
-                    {"Next"}
+                  <button className="btn btn-primary btn-lg" style={{width: 120}} onClick={this.executeJob}>
+                    {"Start job"}
                   </button>
                 </div>
               </td>
@@ -149,8 +184,11 @@ class Home extends React.Component {
             <div className="app-menu">
               {menuButtons}
             </div>
-            <div className="app-header-title">
-              {"Cloud Data Processor: Split and Apply"}
+            <div className="cdapp-header-1">
+              {"CSA"}
+            </div>
+            <div className="cdapp-header-2">
+              {"Executing Split and Apply Operations on Your Data"}
             </div>
           </div>
           <div className="app-body">

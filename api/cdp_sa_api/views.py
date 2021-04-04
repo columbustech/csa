@@ -315,11 +315,15 @@ class CSAJobManager:
     def split(self):
         csa_job = CSAJob.objects.filter(uid=self.uid)[0]
         csa_job.status = 'Running'
-        csa_job.long_status = 'Executing'
+        csa_job.long_status = '["Pulling and installing container for the split operation ..."]'
         csa_job.stage = 'Split'
         csa_job.save()
 
-        time.sleep(10)
+        time.sleep(15)
+        csa_job = CSAJob.objects.filter(uid=self.uid)[0]
+        csa_job.long_status = '["Pulling and installing container for the split operation ...", "Running split container on the input folder ..."]'
+        csa_job.save()
+
         client = py_cdrive_api.Client(access_token=self.access_token)
         csa_apps_dir = 'users/{}/apps/csa'.format(os.environ['COLUMBUS_USERNAME'])
         job_dir = '{}/{}'.format(csa_apps_dir, self.uid)
@@ -333,15 +337,23 @@ class CSAJobManager:
         f.close()
         client.upload('items.json', split_dir)
         os.remove('items.json')
+        csa_job = CSAJob.objects.filter(uid=self.uid)[0]
+        csa_job.long_status = '["Pulling and installing container for the split operation ...", "Running split container on the input folder ...", "Producing a list of {} items and saving it to {} ..."]'.format(len(relative_paths), split_dir + '/items.json')
+        csa_job.save()
 
     def apply(self):
         csa_job = CSAJob.objects.filter(uid=self.uid)[0]
         csa_job.status = 'Running'
-        csa_job.long_status = 'Executing'
+        st = json.loads(csa_job.long_status)
+        st.append("Pulling and installing container for the apply operation ...")
+        csa_job.long_status = json.dumps(st)
         csa_job.stage = 'Apply'
         csa_job.save()
-        time.sleep(10)
+        time.sleep(15)
 
+        st = json.loads(csa_job.long_status)
+        st.append("Running {} copies of the apply container on the items ...".format(self.copies))
+        csa_job.long_status = json.dumps(st)
         client = py_cdrive_api.Client(access_token=self.access_token)
         csa_apps_dir = 'users/{}/apps/csa'.format(os.environ['COLUMBUS_USERNAME'])
         job_dir = '{}/{}'.format(csa_apps_dir, self.uid)
@@ -360,12 +372,6 @@ class CSAJobManager:
             os.remove('part-' + str(i) + '.csv')
 
     def combine(self):
-        csa_job = CSAJob.objects.filter(uid=self.uid)[0]
-        csa_job.status = 'Running'
-        csa_job.long_status = 'Executing'
-        csa_job.stage = 'Combine'
-        csa_job.save()
-        
         client = py_cdrive_api.Client(access_token=self.access_token)
         job_dir = 'users/{}/apps/csa/{}'.format(os.environ['COLUMBUS_USERNAME'], self.uid)
         parts_dir = 'users/{}/apps/csa/{}/apply/parts'.format(os.environ['COLUMBUS_USERNAME'], self.uid)
@@ -378,10 +384,16 @@ class CSAJobManager:
         df.to_csv(os.path.basename(self.output_path))
         client.upload(os.path.basename(self.output_path), os.path.dirname(self.output_path))
         os.remove(os.path.basename(self.output_path))
+        client.delete(job_dir)
         
         csa_job = CSAJob.objects.filter(uid=self.uid)[0]
         csa_job.status = 'Complete'
-        csa_job.long_status = 'Job complete. Output saved to ' + self.output_path + ', intermediate output saved to ' + job_dir
+        st = json.loads(csa_job.long_status)
+        st.append("Combining the outputs of the apply containers into the file {} ...".format(os.path.basename(self.output_path)))
+        st.append("Saving the file to {} ...".format(os.path.dirname(self.output_path)))
+        st.append("Removing temporary directory {} ...".format(job_dir))
+        st.append("Exit successfully")
+        csa_job.long_status = json.dumps(st)
         csa_job.stage = 'Combine'
         csa_job.save()
 
@@ -391,7 +403,8 @@ def execute_workflow(uid, token, data):
         uid = uid,
         access_token = token,
         input_path = data['inputPath'],
-        output_path = data['outputPath']
+        output_path = data['outputPath'],
+        copies = data['copies']
     )
     jm.split()
     jm.apply()

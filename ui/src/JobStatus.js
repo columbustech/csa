@@ -10,7 +10,8 @@ class JobStatus extends React.Component{
     super(props);
     this.state = {
       job: null,
-      actionMessage: ""
+      actionMessage: "",
+      statusHtml: ""
     };
     this.pollStatus = this.pollStatus.bind(this);
   }
@@ -24,8 +25,18 @@ class JobStatus extends React.Component{
         if (response.data.status === "Running") {
           setTimeout(() => this.pollStatus(), 1000);
         }
+        let items, statusHtml;
+        items = JSON.parse(response.data.long_status);
+        statusHtml = items.map(item => {
+          return (
+            <div style={{width: 700}}>
+              <span className="mx-2 h5 font-weight-normal">{item}</span>
+            </div>
+          );
+        });
         this.setState({
-          job: response.data
+          job: response.data,
+          statusHtml: statusHtml
         });
       },
     );
@@ -46,7 +57,12 @@ class JobStatus extends React.Component{
       } else if (this.state.job.status === "Complete" || this.state.job.status === "Error") {
         actions.push(
           <a className="btn btn-primary btn-lg mx-3" href={this.props.specs.appUrl}>
-            Finish
+            Finish Job
+          </a>
+        );
+        actions.push(
+          <a className="btn btn-secondary btn-lg mx-3" href={this.props.specs.cdriveUrl}>
+            Quit CSA
           </a>
         );
       }
@@ -62,21 +78,16 @@ class JobStatus extends React.Component{
             <div className="app-menu">
               {menuButtons}
             </div>
-            <div className="app-header-title">
-              {"Cloud Data Processor: Split and Apply"}
+            <div className="cdapp-header-1">
+              {"CSA"}
+            </div>
+            <div className="cdapp-header-2">
+              {"Executing Split and Apply Operations on Your Data"}
             </div>
           </div>
           <div className="app-body">
             <div className="app-content">
-              <div className="my-5 h3 text-center">
-                {"CSA Status"}
-              </div>
-              <div className="my-4" style={{width: 700}}>
-                <span className="mx-2 h5 font-weight-normal">Stage: {this.state.job.stage}</span>
-              </div>
-              <div className="my-4" style={{width: 700}}>
-                <span className="mx-2 h5 font-weight-normal">Status: {this.state.job.long_status}</span>
-              </div>
+              {this.state.statusHtml}
               <div className="my-5 text-center">
                 {actions}
               </div>
